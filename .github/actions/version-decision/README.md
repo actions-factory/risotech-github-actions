@@ -29,7 +29,6 @@ Format: `MAJOR.MINOR.PATCH[-STAGE]`
 
 | Name | Description | Required | Default | Options |
 |------|-------------|----------|---------|----------|
-| `package-name` | Name of the package | Yes | - | - |
 | `deployment-stage` | Deployment stage | Yes | - | - |
 | `version-type` | Type of versioning | No | `CalVer` | `CalVer`, `SemVer` |
 
@@ -67,7 +66,6 @@ jobs:
       id: version_decision
       uses: actions-factory/risotech-github-actions/.github/actions/version-decision@main
       with:
-        package-name: my-package
         deployment-stage: ${{ needs.deployment-decision.outputs.deployment_stage }}
         version-type: CalVer
 

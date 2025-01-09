@@ -2,9 +2,6 @@ name: Version Decision
 description: 'Decide the next version based on the deployment stage'
 
 inputs:
-  package-name:
-    description: 'Name of the package'
-    required: true
   deployment-stage:
     description: 'Deployment stage'
     required: true
