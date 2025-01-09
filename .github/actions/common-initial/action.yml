@@ -1,0 +1,27 @@
+name: Get Repository Information
+description: 'Set initial environment variables from repository information'
+
+outputs:
+  repository_visibility:
+    description: 'Visibility of the repository'
+    value: ${{ steps.visibility_info.outputs.visibility }}
+  package_name:
+    description: 'Name of the package'
+    value: ${{ steps.package_info.outputs.package_name }}
+
+runs:
+  using: "composite"
+  steps:
+  - name: Check Repository Information
+    id: visibility_info
+    shell: bash
+    run: |
+      visibility=$(curl -s -H "Authorization: Bearer ${{ github.token }}" https://api.github.com/repos/${{ github.repository }} | jq -r .visibility)
+      echo "visibility=$visibility" >> $GITHUB_OUTPUT
+
+  - name: Get package name for workflow
+    id: package_info
+    shell: bash
+    run: |
+      package_name=$(grep -m1 "name = " pyproject.toml | tr -d "['\"]" | cut -d"=" -f2 | xargs)
+      echo "package_name=$package_name" >> $GITHUB_OUTPUT
