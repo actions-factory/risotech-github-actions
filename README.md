@@ -16,6 +16,10 @@ Runs pre-commit linting checks on Python code. [Learn more](/.github/actions/pyt
 
 Executes PyTest for Python projects and generates test coverage reports. [Learn more](/.github/actions/python-test-coverage/README.md)
 
+### Deployment Decision Action
+
+Determines deployment strategies based on event triggers and branch contexts. [Learn more](/.github/actions/deployment-decision/README.md)
+
 ## Usage
 
 Each action has its own documentation with specific usage instructions. Navigate to the action's directory for detailed information.

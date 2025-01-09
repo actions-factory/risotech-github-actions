@@ -1,0 +1,79 @@
+name: Deployment Decision
+description: 'Decide if and how to deploy based on event and branch'
+
+outputs:
+  should_deploy:
+    description: 'Should deploy'
+    value: ${{ steps.deployment_stage_decision.outputs.should_deploy }}
+  deployment_stage:
+    description: 'Deployment stage'
+    value: ${{ steps.deployment_stage_decision.outputs.deployment_stage }}
+  deployment_type:
+    description: 'Type of deployment process'
+    value: ${{ steps.deployment_type_decision.outputs.deployment_type }}
+
+runs:
+  using: "composite"
+  steps:
+  - name: Deployment Stage Decision
+    id: deployment_stage_decision
+    shell: bash
+    run: |
+      # Default values
+      SHOULD_DEPLOY="false"
+      DEPLOY_STAGE="unknown"
+
+      case "${{ github.event_name }}" in
+        "release")
+          case "${{ github.event.action }}" in
+            "prereleased")
+              SHOULD_DEPLOY="true"
+              DEPLOY_STAGE="beta"
+              ;;
+            "released")
+              SHOULD_DEPLOY="true"
+              DEPLOY_STAGE="production"
+              ;;
+          esac
+          ;;
+        "push")
+          case "${{ github.ref }}" in
+            "refs/heads/main"|"refs/heads/master"|"refs/heads/develop")
+              SHOULD_DEPLOY="true"
+              DEPLOY_STAGE="dev"
+              ;;
+            "refs/heads/staging")
+              SHOULD_DEPLOY="true"
+              DEPLOY_STAGE="beta"
+              ;;
+            "refs/heads/production")
+              SHOULD_DEPLOY="true"
+              DEPLOY_STAGE="production"
+              ;;
+          esac
+          ;;
+      esac
+
+      echo "should_deploy=${SHOULD_DEPLOY}" >> $GITHUB_OUTPUT
+      echo "deployment_stage=${DEPLOY_STAGE}" >> $GITHUB_OUTPUT
+
+  - name: Deployment Type Decision
+    if: steps.deployment_stage_decision.outputs.should_deploy == 'true'
+    id: deployment_type_decision
+    shell: bash
+    run: |
+      DEPLOY_TYPE="skip"
+
+      # For push events
+      if [[ "${{ github.event_name }}" == "push" ]]; then
+        case "${{ steps.deployment_stage_decision.outputs.deployment_stage }}" in
+          "dev") DEPLOY_TYPE="direct" ;;
+          "beta") DEPLOY_TYPE="prerelease" ;;
+          "production") DEPLOY_TYPE="release" ;;
+        esac
+      # For release events
+      elif [[ "${{ github.event_name }}" == "release" && "${{ github.event.action }}" =~ ^(pre)?released$ ]]; then
+        DEPLOY_TYPE="${{ github.event.action == 'prereleased' && 'prerelease' || 'release' }}"
+      fi
+
+      echo "deployment_type=${DEPLOY_TYPE}" >> $GITHUB_OUTPUT
