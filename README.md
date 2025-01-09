@@ -32,6 +32,12 @@ Builds release distributions for Python packages, managing version updates and a
 
 Publishes Python packages to PyPI, handling authentication and distribution uploads. [Learn more](/.github/actions/python-publish-package/README.md)
 
+## Available Workflows
+
+### Django Package CI/CD Workflow
+
+A complete CI/CD workflow for Django packages, including linting, testing, and deployment. [Learn more](/.github/workflows/base-django-package.yml)
+
 ## Usage
 
 Each action has its own documentation with specific usage instructions. Navigate to the action's directory for detailed information.

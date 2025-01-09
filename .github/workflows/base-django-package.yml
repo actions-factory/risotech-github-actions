@@ -1,0 +1,145 @@
+name: Django Package CI/CD
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        type: string
+        description: 'Python Version'
+        required: false
+        default: '3.12'
+      version-type:
+        type: string
+        description: 'Version Type'
+        required: false
+        default: 'CalVer'
+    secrets:
+      DEVPI_TOKEN:
+        required: false
+      PYPI_TOKEN:
+        required: false
+      DEVPI_URL:
+        required: false
+
+jobs:
+  repository-information:
+    name: 📊 Analysis repository information
+    runs-on: ubuntu-latest
+    outputs:
+      repository_visibility: ${{ steps.common_initial.outputs.repository_visibility }}
+      package_name: ${{ steps.common_initial.outputs.package_name }}
+    steps:
+    - name: 📥 Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: 🔰 Initial Setup
+      id: common_initial
+      uses: actions-factory/risotech-github-actions/.github/actions/common-initial@main
+
+    - name: 📢 Show Outputs
+      run: |
+        echo "This Repo is: ${{ steps.common_initial.outputs.repository_visibility }}"
+        echo "Package Name: ${{ steps.common_initial.outputs.package_name }}"
+
+  python-linter:
+    name: ⚡️ Python Lint
+    runs-on: ubuntu-latest
+    steps:
+    - name: 📥 Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: 🔍 Run Python Linter
+      uses: actions-factory/risotech-github-actions/.github/actions/python-linter@main
+      with:
+        python-version: ${{ inputs.python-version }}
+
+  pytest-coverage:
+    name: 🧪 Test Coverage with PyTest
+    runs-on: ubuntu-latest
+    steps:
+    - name: 📥 Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: 🧪 Run PyTest with Coverage Report
+      uses: actions-factory/risotech-github-actions/.github/actions/python-test-coverage@main
+      with:
+        python-version: ${{ inputs.python-version }}
+
+  deployment-decision:
+    name: 🚀 Deploy Decision
+    needs: [python-linter, pytest-coverage]
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.deployment_decision.outputs.should_deploy }}
+      deployment_stage: ${{ steps.deployment_decision.outputs.deployment_stage }}
+      deployment_type: ${{ steps.deployment_decision.outputs.deployment_type }}
+    steps:
+    - name: 🎯 Deploy Strategy
+      id: deployment_decision
+      uses: actions-factory/risotech-github-actions/.github/actions/deployment-decision@main
+
+    - name: 📢 Show Deploy Info
+      run: |
+        echo "Should Deploy: ${{ steps.deployment_decision.outputs.should_deploy }}"
+        echo "Stage: ${{ steps.deployment_decision.outputs.deployment_stage }}"
+        echo "Type: ${{ steps.deployment_decision.outputs.deployment_type }}"
+
+  version-decision:
+    name: 🏷️ Version Decision
+    needs: deployment-decision
+    if: needs.deployment-decision.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version_decision.outputs.version }}
+    permissions:
+      contents: write
+    steps:
+    - name: 📥 Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ github.token }}
+
+    - name: 🏷️ Version Decision
+      id: version_decision
+      uses: actions-factory/risotech-github-actions/.github/actions/version-decision@main
+      with:
+        deployment-stage: ${{ needs.deployment-decision.outputs.deployment_stage }}
+        version-type: ${{ inputs.version-type }}
+
+    - name: 📢 Show New Version
+      run: |
+        echo "New Version: ${{ steps.version_decision.outputs.version }}"
+
+  python-build:
+    name: 🏗️ Build Package
+    needs: [ repository-information, version-decision]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+    - name: 📥 Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: 📦 Build Python Package
+      uses: actions-factory/risotech-github-actions/.github/actions/python-build-package@main
+      with:
+        python-version: ${{ inputs.python-version }}
+        package-name: ${{ needs.repository-information.outputs.package_name }}
+        new-version: ${{ needs.version-decision.outputs.version }}
+
+  python-publish:
+    name: 📦 Publish Package
+    needs: [ repository-information, python-build]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: read
+    steps:
+    - name: 🚀 Publish to PyPI
+      uses: actions-factory/risotech-github-actions/.github/actions/python-publish-package@main
+      with:
+        package-name: ${{ needs.repository-information.outputs.package_name }}
+        pypi-url: ${{ needs.repository-information.outputs.repository_visibility == 'private' && secrets.DEVPI_URL || 'https://upload.pypi.org/legacy/' }}
+        pypi-token: ${{ needs.repository-information.outputs.repository_visibility == 'private' && secrets.DEVPI_TOKEN || secrets.PYPI_TOKEN }}
