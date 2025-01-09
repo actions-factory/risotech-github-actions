@@ -1,0 +1,41 @@
+name: Python Publish Package
+description: 'Publish release distributions for Python package to PyPI'
+
+inputs:
+  package-name:
+    description: 'Name of the package'
+    required: true
+  pypi-url:
+    description: 'PyPI repository URL'
+    required: false
+    default: 'https://upload.pypi.org/legacy/'
+  pypi-token:
+    description: 'PyPI token'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+  - name: Download all the dists
+    uses: actions/download-artifact@v4
+    with:
+      name: ${{ inputs.package-name }}
+      path: dist/
+
+  - name: Set up publish environment
+    shell: bash
+    run: |
+      python -m pip install --upgrade pip
+      python -m pip install twine
+
+  - name: Publish to PyPI
+    shell: bash
+    run: |
+      if ! twine upload --repository-url ${{ inputs.pypi-url }} -u __token__ -p ${{ inputs.pypi-token }} dist/* > upload_output.txt 2>&1; then
+        TWINE_EXIT_CODE=1
+        cat upload_output.txt
+      else
+        TWINE_EXIT_CODE=0
+      fi
+
+      exit $TWINE_EXIT_CODE

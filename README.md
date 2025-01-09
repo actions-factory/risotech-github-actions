@@ -28,6 +28,10 @@ Calculates version numbers for Python packages using CalVer or SemVer formats. [
 
 Builds release distributions for Python packages, managing version updates and artifact generation. [Learn more](/.github/actions/python-build/README.md)
 
+### Python Publish Package Action
+
+Publishes Python packages to PyPI, handling authentication and distribution uploads. [Learn more](/.github/actions/python-publish-package/README.md)
+
 ## Usage
 
 Each action has its own documentation with specific usage instructions. Navigate to the action's directory for detailed information.
