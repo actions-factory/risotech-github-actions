@@ -24,6 +24,10 @@ Determines deployment strategies based on event triggers and branch contexts. [L
 
 Calculates version numbers for Python packages using CalVer or SemVer formats. [Learn more](/.github/actions/version-decision/README.md)
 
+### Python Build Package Action
+
+Builds release distributions for Python packages, managing version updates and artifact generation. [Learn more](/.github/actions/python-build/README.md)
+
 ## Usage
 
 Each action has its own documentation with specific usage instructions. Navigate to the action's directory for detailed information.
