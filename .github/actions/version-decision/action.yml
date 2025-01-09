@@ -1,0 +1,73 @@
+name: Version Decision
+description: 'Decide the next version based on the deployment stage'
+
+inputs:
+  package-name:
+    description: 'Name of the package'
+    required: true
+  deployment-stage:
+    description: 'Deployment stage'
+    required: true
+  version-type:
+    type: choice
+    description: 'Type of versioning'
+    required: false
+    default: 'CalVer'
+    options:
+      - 'CalVer'
+      - 'SemVer'
+
+outputs:
+  version:
+    description: 'New version'
+    value: ${{ steps.version_calculation.outputs.version }}
+
+runs:
+  using: "composite"
+  steps:
+  - uses: actions/setup-python@v5
+    with:
+      python-version: ${{ env.PYTHON_VERSION }}
+      cache: pip
+      cache-dependency-path: requirements.txt
+
+  - name: Version Calculation
+    id: version_calculation
+    shell: bash
+    run: |
+      # Get current version
+      CURRENT_VERSION=$(grep -oP '^version = "\K[^"]+' pyproject.toml || echo "0.0.0")
+
+      if [[ "${{ inputs.version-type }}" == "SemVer" ]]; then
+        IFS='.' read -r MAJOR MINOR PATCH <<< "${CURRENT_VERSION%-*}"
+        PATCH=${PATCH:-0}
+
+        # Increment based on deployment type
+        PATCH=$((PATCH + 1))
+
+        RAW_VERSION="$MAJOR.$MINOR.$PATCH"
+
+      elif [[ "${{ inputs.version-type }}" == "CalVer" ]]; then
+        # Get current date
+        TODAY=$(date +'%Y.%m%d')
+
+        # Calculate new version number: increment if same day, else start at 1
+        NEW_COUNT=$(
+          if [[ $CURRENT_VERSION == $TODAY.* ]]; then
+            echo $CURRENT_VERSION | cut -d. -f3 | cut -d- -f1 | awk '{print $1 + 1}'
+          else
+            echo "1"
+          fi
+        )
+
+        RAW_VERSION="$TODAY.$NEW_COUNT"
+      fi
+
+      # Build new version with optional stage suffix
+      echo "version=$RAW_VERSION$(
+        case "${{ inputs.deployment-stage }}" in
+          "beta") echo "-beta" ;;
+          "dev") echo "-dev" ;;
+          *) echo "" ;;
+        esac
+      )" >> $GITHUB_OUTPUT
