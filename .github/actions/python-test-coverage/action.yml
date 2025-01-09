@@ -1,0 +1,56 @@
+name: PyTest and Coverage
+description: 'Run PyTest and Coverage with CodeCov Report'
+
+inputs:
+  python-version:
+    description: 'Python version to use'
+    required: false
+    default: '3.12'
+  codecov-token:
+    description: 'Codecov token'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+  - name: Set up Python ${{ inputs.python-version }}
+    uses: actions/setup-python@v5.3.0
+    with:
+      python-version: ${{ inputs.python-version }}
+      cache: pip
+      cache-dependency-path: |
+        requirements.txt
+
+  - name: Install Dependencies
+    shell: bash
+    run: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+
+  - name: Run Tests & Coverage
+    id: test
+    shell: bash
+    run: |
+      coverage run -m pytest
+      echo "PYTEST_EXIT_CODE=$?" >> $GITHUB_ENV
+
+  - name: Upload Coverage to Codecov
+    if: env.PYTEST_EXIT_CODE == 0 && inputs.codecov-token != ''
+    uses: codecov/codecov-action@v4
+    with:
+      token: ${{ inputs.codecov-token }}
+      files: ./coverage.xml
+      flags: unittests
+      fail_ci_if_error: true
+
+  - name: Export Coverage to XML
+    if: env.PYTEST_EXIT_CODE == 0 && inputs.codecov-token == ''
+    shell: bash
+    run: coverage xml
+
+  - name: Upload Coverage to Artifacts
+    if: env.PYTEST_EXIT_CODE == 0 && inputs.codecov-token == ''
+    uses: actions/upload-artifact@v4
+    with:
+      name: coverage-report
+      path: ./coverage.xml
