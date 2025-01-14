@@ -20,6 +20,8 @@ on:
         required: false
       DEVPI_URL:
         required: false
+      CODECOV_TOKEN:
+        required: false
 
 jobs:
   repository-information:
@@ -64,6 +66,7 @@ jobs:
       uses: actions-factory/risotech-github-actions/.github/actions/python-test-coverage@main
       with:
         python-version: ${{ inputs.python-version }}
+        codecov-token: ${{ secrets.CODECOV_TOKEN || '' }}
 
   deployment-decision:
     name: 🚀 Deploy Decision
