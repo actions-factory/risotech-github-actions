@@ -36,7 +36,7 @@ runs:
 
   - name: Upload Coverage to Codecov
     if: env.PYTEST_EXIT_CODE == 0 && inputs.codecov-token != ''
-    uses: codecov/codecov-action@v4
+    uses: codecov/codecov-action@v5
     with:
       token: ${{ inputs.codecov-token }}
       files: ./coverage.xml
