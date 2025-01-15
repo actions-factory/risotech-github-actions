@@ -94,6 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version_decision.outputs.version }}
+      raw_version: ${{ steps.version_decision.outputs.raw_version }}
     permissions:
       contents: write
     steps:
@@ -109,11 +110,13 @@ jobs:
       with:
         package-name: ${{ needs.repository-information.outputs.package_name }}
         deployment-stage: ${{ needs.deployment-decision.outputs.deployment_stage }}
+        deployment-type: ${{ needs.deployment-decision.outputs.deployment_type }}
         version-type: ${{ inputs.version-type }}
 
     - name: 📢 Show New Version
       run: |
         echo "New Version: ${{ steps.version_decision.outputs.version }}"
+        echo "Raw Version: ${{ steps.version_decision.outputs.raw_version }}"
 
   python-build:
     name: 🏗️ Build Package
