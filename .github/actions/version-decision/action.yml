@@ -8,6 +8,9 @@ inputs:
   deployment-stage:
     description: 'Deployment stage'
     required: true
+  deployment-type:
+    description: 'Deployment type'
+    required: true
   version-type:
     type: choice
     description: 'Type of versioning'
@@ -36,34 +39,41 @@ runs:
 
   - name: Version Calculation
     id: version_calculation
+    if: ${{ inputs.deployment-type != 'skip' }}
     shell: bash
     run: |
       # Get current version
       CURRENT_VERSION=$(grep -oP '__version__ = "\K[^"]+' "${{ inputs.package-name }}/__init__.py" || echo "0.0.0")
 
-      if [[ "${{ inputs.version-type }}" == "SemVer" ]]; then
-        IFS='.' read -r MAJOR MINOR PATCH <<< "${CURRENT_VERSION%-*}"
-        PATCH=${PATCH:-0}
+      if [[ "${{ inputs.deployment-type }}" == "direct" ]]; then
+      
+        if [[ "${{ inputs.version-type }}" == "SemVer" ]]; then
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${CURRENT_VERSION%-*}"
+          PATCH=${PATCH:-0}
 
-        # Increment based on deployment type
-        PATCH=$((PATCH + 1))
+          # Increment based on deployment type
+          PATCH=$((PATCH + 1))
 
-        RAW_VERSION="$MAJOR.$MINOR.$PATCH"
+          RAW_VERSION="$MAJOR.$MINOR.$PATCH"
 
-      elif [[ "${{ inputs.version-type }}" == "CalVer" ]]; then
-        # Get current date
-        TODAY=$(date +'%Y.%m%d')
+        elif [[ "${{ inputs.version-type }}" == "CalVer" ]]; then
+          # Get current date
+          TODAY=$(date +'%Y.%m%d')
 
-        # Calculate new version number: increment if same day, else start at 1
-        NEW_COUNT=$(
-          if [[ $CURRENT_VERSION == $TODAY.* ]]; then
-            echo $CURRENT_VERSION | cut -d. -f3 | cut -d- -f1 | awk '{print $1 + 1}'
-          else
-            echo "1"
-          fi
-        )
+          # Calculate new version number: increment if same day, else start at 1
+          NEW_COUNT=$(
+            if [[ $CURRENT_VERSION == $TODAY.* ]]; then
+              echo $CURRENT_VERSION | cut -d. -f3 | cut -d- -f1 | awk '{print $1 + 1}'
+            else
+              echo "1"
+            fi
+          )
 
-        RAW_VERSION="$TODAY.$NEW_COUNT"
+          RAW_VERSION="$TODAY.$NEW_COUNT"
+        fi
+
+      else
+        RAW_VERSION=$CURRENT_VERSION
       fi
 
       # Output raw version

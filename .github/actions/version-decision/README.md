@@ -31,6 +31,7 @@ Format: `MAJOR.MINOR.PATCH[-STAGE]`
 |------|-------------|----------|---------|----------|
 | `package-name` | Name of the package for artifact | Yes | - | - |
 | `deployment-stage` | Deployment stage | Yes | - | - |
+| `deployment-type` | Deployment type | Yes | - | - |
 | `version-type` | Type of versioning | No | `CalVer` | `CalVer`, `SemVer` |
 
 ## Outputs
