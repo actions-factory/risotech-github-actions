@@ -89,7 +89,7 @@ jobs:
 
   version-decision:
     name: 🏷️ Version Decision
-    needs: deployment-decision
+    needs: [ repository-information, deployment-decision ]
     if: needs.deployment-decision.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     outputs:
@@ -107,6 +107,7 @@ jobs:
       id: version_decision
       uses: actions-factory/risotech-github-actions/.github/actions/version-decision@main
       with:
+        package-name: ${{ needs.repository-information.outputs.package_name }}
         deployment-stage: ${{ needs.deployment-decision.outputs.deployment_stage }}
         version-type: ${{ inputs.version-type }}
 
