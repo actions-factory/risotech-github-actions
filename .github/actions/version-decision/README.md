@@ -71,6 +71,7 @@ jobs:
       with:
         package-name: ${{ needs.repository-information.outputs.package_name }}
         deployment-stage: ${{ needs.deployment-decision.outputs.deployment_stage }}
+        deployment-type: ${{ needs.deployment-decision.outputs.deployment_type }}
         version-type: CalVer
 
     - name: 📢 Show New Version
