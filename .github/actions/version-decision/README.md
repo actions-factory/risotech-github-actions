@@ -38,6 +38,7 @@ Format: `MAJOR.MINOR.PATCH[-STAGE]`
 | Name | Description |
 |------|-------------|
 | `version` | The calculated new version |
+| `raw_version` | The calculated raw version |
 
 ## Example
 

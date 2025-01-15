@@ -21,6 +21,9 @@ outputs:
   version:
     description: 'New version'
     value: ${{ steps.version_calculation.outputs.version }}
+  raw_version:
+    description: 'Raw version'
+    value: ${{ steps.version_calculation.outputs.raw_version }}
 
 runs:
   using: "composite"
@@ -62,6 +65,9 @@ runs:
 
         RAW_VERSION="$TODAY.$NEW_COUNT"
       fi
+
+      # Output raw version
+      echo "raw_version=$RAW_VERSION" >> $GITHUB_OUTPUT
 
       # Build new version with optional stage suffix
       echo "version=$RAW_VERSION$(
