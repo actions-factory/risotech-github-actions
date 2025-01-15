@@ -77,4 +77,5 @@ jobs:
     - name: 📢 Show New Version
       run: |
         echo "New Version: ${{ steps.version_decision.outputs.version }}"
+        echo "Raw Version: ${{ steps.version_decision.outputs.raw_version }}"
 ```
