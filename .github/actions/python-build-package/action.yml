@@ -27,7 +27,6 @@ runs:
   - name: Update version
     shell: bash
     run: |
-      sed -i "s/^version = \".*\"/version = \"${{ inputs.new-version }}\"/" pyproject.toml
       package_name=$(echo ${{ inputs.package-name }} | tr '-' '_')
       sed -i "s/__version__ = \".*\"/__version__ = \"${{ inputs.new-version }}\"/" $package_name/__init__.py
 
