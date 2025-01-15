@@ -2,6 +2,9 @@ name: Version Decision
 description: 'Decide the next version based on the deployment stage'
 
 inputs:
+  package-name:
+    description: 'Name of the package'
+    required: true
   deployment-stage:
     description: 'Deployment stage'
     required: true
@@ -33,7 +36,7 @@ runs:
     shell: bash
     run: |
       # Get current version
-      CURRENT_VERSION=$(grep -oP '^version = "\K[^"]+' pyproject.toml || echo "0.0.0")
+      CURRENT_VERSION=$(grep -oP '__version__ = "\K[^"]+' "${{ inputs.package-name }}/__init__.py" || echo "0.0.0")
 
       if [[ "${{ inputs.version-type }}" == "SemVer" ]]; then
         IFS='.' read -r MAJOR MINOR PATCH <<< "${CURRENT_VERSION%-*}"

@@ -29,6 +29,7 @@ Format: `MAJOR.MINOR.PATCH[-STAGE]`
 
 | Name | Description | Required | Default | Options |
 |------|-------------|----------|---------|----------|
+| `package-name` | Name of the package for artifact | Yes | - | - |
 | `deployment-stage` | Deployment stage | Yes | - | - |
 | `version-type` | Type of versioning | No | `CalVer` | `CalVer`, `SemVer` |
 
@@ -50,7 +51,7 @@ on:
 jobs:
   version-decision:
     name: 🏷️ Version Decision
-    needs: deployment-decision
+    needs: [ repository-information, deployment-decision ]
     if: needs.deployment-decision.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -66,6 +67,7 @@ jobs:
       id: version_decision
       uses: actions-factory/risotech-github-actions/.github/actions/version-decision@main
       with:
+        package-name: ${{ needs.repository-information.outputs.package_name }}
         deployment-stage: ${{ needs.deployment-decision.outputs.deployment_stage }}
         version-type: CalVer
 
