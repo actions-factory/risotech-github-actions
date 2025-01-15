@@ -12,6 +12,9 @@ inputs:
   new-version:
     description: 'New version'
     required: true
+  raw-version:
+    description: 'Raw version'
+    required: true
 
 runs:
   using: "composite"
@@ -27,20 +30,7 @@ runs:
   - name: Update version
     shell: bash
     run: |
-      package_name=$(echo ${{ inputs.package-name }} | tr '-' '_')
       sed -i "s/__version__ = \".*\"/__version__ = \"${{ inputs.new-version }}\"/" $package_name/__init__.py
-
-  # - name: Commit version bump
-  #   env:
-  #     GITHUB_TOKEN: ${{ github.token }}
-  #   shell: bash
-  #   run: |
-  #     git config --local user.email "github-actions[bot]@users.noreply.github.com"
-  #     git config --local user.name "github-actions[bot]"
-  #     git add pyproject.toml
-  #     git add ${{ inputs.package-name }}/__init__.py
-  #     git commit -m "chore: update version to ${{ inputs.version }}"
-  #     git push
 
   - name: Build release distributions
     shell: bash
@@ -53,3 +43,15 @@ runs:
     with:
       name: ${{ inputs.package-name }}
       path: dist/
+
+  - name: Commit version bump
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    shell: bash
+    run: |
+      sed -i "s/__version__ = \".*\"/__version__ = \"${{ inputs.raw-version }}\"/" $package_name/__init__.py
+      git config --local user.email "github-actions[bot]@users.noreply.github.com"
+      git config --local user.name "github-actions[bot]"
+      git add ${{ inputs.package-name }}/__init__.py
+      git commit -m "chore: update version to ${{ inputs.raw-version }}"
+      git push

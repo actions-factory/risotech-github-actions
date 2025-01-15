@@ -34,6 +34,7 @@ my-package/
 | `python-version` | Python version to use for building | No | `3.12` |
 | `package-name` | Name of the package for artifact | Yes | - |
 | `new-version` | New version of artifact | Yes | - |
+| `raw-version` | Raw version of artifact | Yes | - |
 
 ## Outputs
 
@@ -62,4 +63,5 @@ jobs:
         python-version: '3.12'
         package-name: ${{ needs.repository-information.outputs.package_name }}
         new-version: ${{ needs.version-decision.outputs.version }}
+        raw-version: ${{ needs.version-decision.outputs.raw_version }}
 ```
