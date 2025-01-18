@@ -30,7 +30,7 @@ runs:
   - name: Update version
     shell: bash
     run: |
-      sed -i "s/__version__ = \".*\"/__version__ = \"${{ inputs.new-version }}\"/" $package_name/__init__.py
+      sed -i "s/__version__ = \".*\"/__version__ = \"${{ inputs.new-version }}\"/" ${{ inputs.package-name }}/__init__.py
 
   - name: Build release distributions
     shell: bash
