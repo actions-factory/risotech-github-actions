@@ -2,6 +2,10 @@ name: Version Decision
 description: 'Decide the next version based on the deployment stage'
 
 inputs:
+  python-version:
+    description: 'Python version to use'
+    required: false
+    default: '3.12'
   package-name:
     description: 'Name of the package'
     required: true
@@ -33,7 +37,7 @@ runs:
   steps:
   - uses: actions/setup-python@v5
     with:
-      python-version: ${{ env.PYTHON_VERSION }}
+      python-version: ${{ inputs.python-version }}
       cache: pip
       cache-dependency-path: requirements.txt
 
@@ -46,7 +50,7 @@ runs:
       CURRENT_VERSION=$(grep -oP '__version__ = "\K[^"]+' "${{ inputs.package-name }}/__init__.py" || echo "0.0.0")
 
       if [[ "${{ inputs.deployment-type }}" == "direct" ]]; then
-      
+
         if [[ "${{ inputs.version-type }}" == "SemVer" ]]; then
           IFS='.' read -r MAJOR MINOR PATCH <<< "${CURRENT_VERSION%-*}"
           PATCH=${PATCH:-0}

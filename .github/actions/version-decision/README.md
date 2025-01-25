@@ -29,6 +29,7 @@ Format: `MAJOR.MINOR.PATCH[-STAGE]`
 
 | Name | Description | Required | Default | Options |
 |------|-------------|----------|---------|----------|
+| `python-version` | Python version to use for building | No | `3.12` | - |
 | `package-name` | Name of the package for artifact | Yes | - | - |
 | `deployment-stage` | Deployment stage | Yes | - | - |
 | `deployment-type` | Deployment type | Yes | - | - |
@@ -69,6 +70,7 @@ jobs:
       id: version_decision
       uses: actions-factory/risotech-github-actions/.github/actions/version-decision@main
       with:
+        python-version: '3.12'
         package-name: ${{ needs.repository-information.outputs.package_name }}
         deployment-stage: ${{ needs.deployment-decision.outputs.deployment_stage }}
         deployment-type: ${{ needs.deployment-decision.outputs.deployment_type }}
