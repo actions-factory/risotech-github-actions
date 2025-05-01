@@ -43,51 +43,51 @@ runs:
 
   - name: Version Calculation
     id: version_calculation
-    if: ${{ inputs.deployment-type != 'skip' }}
+    if: inputs.deployment-type != 'skip'
     shell: bash
     run: |
       # Get current version
       CURRENT_VERSION=$(grep -oP '__version__ = "\K[^"]+' "${{ inputs.package-name }}/__init__.py" || echo "0.0.0")
+      RAW_VERSION="$CURRENT_VERSION"
+
+      if [[ ${{ inputs.deployment-stage }} == "beta" ]]; then
+        SUFFIX="-beta"
+      elif [[ ${{ inputs.deployment-stage }} == "dev" ]]; then
+        SUFFIX="-dev"
+      else
+        SUFFIX=""
+      fi
 
       if [[ "${{ inputs.deployment-type }}" == "direct" ]]; then
-
         if [[ "${{ inputs.version-type }}" == "SemVer" ]]; then
           IFS='.' read -r MAJOR MINOR PATCH <<< "${CURRENT_VERSION%-*}"
           PATCH=${PATCH:-0}
-
           # Increment based on deployment type
           PATCH=$((PATCH + 1))
-
           RAW_VERSION="$MAJOR.$MINOR.$PATCH"
-
+          echo "raw_version=$RAW_VERSION" >> $GITHUB_OUTPUT
         elif [[ "${{ inputs.version-type }}" == "CalVer" ]]; then
           # Get current date
-          TODAY=$(date +'%Y.%m%d')
-
-          # Calculate new version number: increment if same day, else start at 1
-          NEW_COUNT=$(
-            if [[ $CURRENT_VERSION == $TODAY.* ]]; then
-              echo $CURRENT_VERSION | cut -d. -f3 | cut -d- -f1 | awk '{print $1 + 1}'
-            else
-              echo "1"
-            fi
-          )
-
-          RAW_VERSION="$TODAY.$NEW_COUNT"
+          TODAY=$(date +'%Y.%m.%d')
+          RAW_VERSION="$TODAY"
+          echo "raw_version=$RAW_VERSION" >> $GITHUB_OUTPUT
         fi
-
       else
-        RAW_VERSION=$CURRENT_VERSION
+        echo "raw_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
       fi
 
-      # Output raw version
-      echo "raw_version=$RAW_VERSION" >> $GITHUB_OUTPUT
+      # Append suffix if needed
+      if [[ -n "$SUFFIX" ]]; then
+        # Calculate new version number: increment if same bump version, else start at 1
+        NEW_COUNT=$(
+          if [[ $CURRENT_VERSION == $RAW_VERSION$SUFFIX.* ]]; then
+            echo $CURRENT_VERSION | cut -d. -f3 | cut -d- -f1 | awk '{print $1 + 1}'
+          else
+            echo "1"
+          fi
+        )
 
-      # Build new version with optional stage suffix
-      echo "version=$RAW_VERSION$(
-        case "${{ inputs.deployment-stage }}" in
-          "beta") echo "-beta" ;;
-          "dev") echo "-dev" ;;
-          *) echo "" ;;
-        esac
-      )" >> $GITHUB_OUTPUT
+        RAW_VERSION="$RAW_VERSION$SUFFIX-$NEW_COUNT"
+      fi
+      # Set the new version
+      echo "version=$RAW_VERSION" >> $GITHUB_OUTPUT
