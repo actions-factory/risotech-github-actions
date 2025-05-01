@@ -41,6 +41,7 @@ Format: `MAJOR.MINOR.PATCH[-STAGE]`
 |------|-------------|
 | `version` | The calculated new version |
 | `raw_version` | The calculated raw version |
+| `commit_bump` | Commit bump version or not |
 
 ## Example
 
@@ -80,4 +81,5 @@ jobs:
       run: |
         echo "New Version: ${{ steps.version_decision.outputs.version }}"
         echo "Raw Version: ${{ steps.version_decision.outputs.raw_version }}"
+        echo "Commit Bump: ${{ steps.version_decision.outputs.commit_bump }}"
 ```

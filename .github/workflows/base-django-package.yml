@@ -118,6 +118,7 @@ jobs:
       run: |
         echo "New Version: ${{ steps.version_decision.outputs.version }}"
         echo "Raw Version: ${{ steps.version_decision.outputs.raw_version }}"
+        echo "Commit bump: ${{ steps.version_decision.outputs.commit_bump }}"
 
   python-build:
     name: 🏗️ Build Package

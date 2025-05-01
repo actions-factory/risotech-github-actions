@@ -31,6 +31,9 @@ outputs:
   raw_version:
     description: 'Raw version'
     value: ${{ steps.version_calculation.outputs.raw_version }}
+  commit_bump:
+    description: 'Commit bump version'
+    value: ${{ steps.version_calculation.outputs.commit_bump }}
 
 runs:
   using: "composite"
@@ -74,6 +77,12 @@ runs:
         fi
       else
         echo "raw_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+      fi
+
+      if [[ $CURRENT_VERSION == $RAW_VERSION ]]; then
+        echo "commit_bump=false" >> $GITHUB_OUTPUT
+      else
+        echo "commit_bump=true" >> $GITHUB_OUTPUT
       fi
 
       # Append suffix if needed
