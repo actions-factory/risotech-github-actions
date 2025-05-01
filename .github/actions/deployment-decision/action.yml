@@ -40,7 +40,7 @@ runs:
           case "${{ github.ref }}" in
             "refs/heads/main"|"refs/heads/master"|"refs/heads/develop")
               SHOULD_DEPLOY="true"
-              DEPLOY_STAGE="dev"
+              DEPLOY_STAGE="alpha"
               ;;
             "refs/heads/staging")
               SHOULD_DEPLOY="true"
@@ -67,7 +67,7 @@ runs:
       # For push events
       if [[ "${{ github.event_name }}" == "push" ]]; then
         case "${{ steps.deployment_stage_decision.outputs.deployment_stage }}" in
-          "dev") DEPLOY_TYPE="direct" ;;
+          "alpha") DEPLOY_TYPE="direct" ;;
           "beta") DEPLOY_TYPE="prerelease" ;;
           "production") DEPLOY_TYPE="release" ;;
         esac

@@ -37,7 +37,7 @@ This GitHub Action determines deployment strategies based on event triggers and 
 | Name | Description |
 |------|-------------|
 | `should_deploy` | Boolean flag indicating if deployment should proceed (`true`/`false`) |
-| `deployment_stage` | Target deployment stage (`dev`/`beta`/`production`/`unknown`) |
+| `deployment_stage` | Target deployment stage (`alpha`/`beta`/`production`/`unknown`) |
 | `deployment_type` | Type of deployment process (`direct`/`prerelease`/`release`/`skip`) |
 
 ## Example
