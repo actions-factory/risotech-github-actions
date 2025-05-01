@@ -35,6 +35,7 @@ my-package/
 | `package-name` | Name of the package for artifact | Yes | - |
 | `new-version` | New version of artifact | Yes | - |
 | `raw-version` | Raw version of artifact | Yes | - |
+| `commit-bump` | Commit bump version or not | Yes | - |
 
 ## Outputs
 
@@ -64,4 +65,5 @@ jobs:
         package-name: ${{ needs.repository-information.outputs.package_name }}
         new-version: ${{ needs.version-decision.outputs.version }}
         raw-version: ${{ needs.version-decision.outputs.raw_version }}
+        commit-bump: ${{ needs.version-decision.outputs.commit_bump }}
 ```
